@@ -68,6 +68,26 @@ const userController = {
       res.json(user);
       user.remove();
     })
+  },
+
+  // Create friend
+  createFriend({ body }, res) { // Destructure body out of the Express req object since that's the only part we need 
+    User.create(body) // create will handle either inserting one or inserting many
+      .then(dbUserData => res.json(dbUserData))
+      .catch(err => res.status(400).json(err));
+  },
+
+  // Delete friend
+  deleteFriend({ params }, res) {
+    User.findOneAndDelete({ _id: params.userId })
+      .then(dbUserData => {
+        if (!dbUserData) {
+          res.status(404).json({ message: 'No friend found with this id!' });
+          return;
+        }
+        res.json(dbUserData);
+      })
+      .catch(err => res.status(400).json(err));
   }
 };
 
