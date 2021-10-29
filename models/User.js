@@ -11,8 +11,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-    match: [/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/],
-    validate: 'Please enter a valid email address'
+    match: [/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/, 'Please enter a valid email'],
   },
   thoughts: [
     {
@@ -35,9 +34,17 @@ const UserSchema = new Schema({
 }
 );
 
+
 // Virtual called friendCount that retrieves the length of the user's friends array field on query
 UserSchema.virtual('friendCount').get(function() {
   return this.friends.length;
+});
+
+// https://github.com/Automattic/mongoose/issues/1241
+UserSchema.pre('remove', function(next) {
+  // 'this' is the client being removed. Provide callbacks here if you want to be notified of the calls' result.
+  Thought.remove({userId: this._id}).exec();
+  next();
 });
 
 const User = model('User', UserSchema);
