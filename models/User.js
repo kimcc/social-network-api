@@ -31,8 +31,7 @@ const UserSchema = new Schema({
     virtuals: true
   },
   id: false // Set id to false because this is a virtual that Mongoose returns and we don't need it
-}
-);
+});
 
 
 // Virtual called friendCount that retrieves the length of the user's friends array field on query
@@ -40,10 +39,10 @@ UserSchema.virtual('friendCount').get(function() {
   return this.friends.length;
 });
 
-// https://github.com/Automattic/mongoose/issues/1241
+// https://stackoverflow.com/questions/14348516/cascade-style-delete-in-mongoose
+// Use remove middleware to remove the thought before removing the user
 UserSchema.pre('remove', function(next) {
-  // 'this' is the client being removed. Provide callbacks here if you want to be notified of the calls' result.
-  Thought.remove({userId: this._id}).exec();
+  this.model('Thought').remove({ username: this.username }, next);
   next();
 });
 

@@ -1,19 +1,19 @@
-const { User, Thought } = require('../models');
+const { User } = require('../models');
 
 const userController = {
   // get all Users
   getAllUser(req, res) {
     User.find({})
-      .populate({ // Use populate to populate the field with the thoughts info
+      .populate({ // Populate with the thoughts info
         path: 'thoughts',
         select: '-__v' 
       })
-      .populate({ // Use populate to populate the field with the friends info
+      .populate({ // Populate with the friends info
         path: 'friends',
         select: '-__v' 
       })
       .select('-__v')
-      .sort({ _id: -1 }) // Sort by DESC order by the _id value. We can do this because there's a hidden timestamp value in the MongoDB ObjectId
+      .sort({ _id: -1 }) // Sort by DESC order by the _id value
       .then(dbUserData => res.json(dbUserData))
       .catch(err => {
         console.log(err);
@@ -46,23 +46,28 @@ const userController = {
     });
   },
 
-  createUser({ body }, res) { // Destructure body out of the Express req object since that's the only part we need 
-    User.create(body) // create will handle either inserting one or inserting many
+  // Create user
+  createUser({ body }, res) { 
+    User.create(body) 
       .then(dbUserData => res.json(dbUserData))
       .catch(err => res.status(400).json(err));
   },
 
   // Find one document we want to update, update it, and return the updated document
   updateUser({ params, body }, res) {
-    User.findOneAndUpdate({ _id: params.userId }, body, { new: true, runValidators: true }) // Set new to true so it won't return the original document. Tell Mongoose to return the new version of the document
-      .then(dbUserData => {
-        if (!dbUserData) {
-          res.status(404).json({ message: 'No user found with this id!'} );
-          return;
-        }
-        res.json(dbUserData);
-      })
-      .catch(err => res.status(400).json(err));
+    User.findOneAndUpdate(
+      { _id: params.userId }, 
+      body, 
+      { new: true, runValidators: true }
+    ) 
+    .then(dbUserData => {
+      if (!dbUserData) {
+        res.status(404).json({ message: 'No user found with this id!'} );
+        return;
+      }
+      res.json(dbUserData);
+    })
+    .catch(err => res.status(400).json(err));
   },
 
   // Delete User

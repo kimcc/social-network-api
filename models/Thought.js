@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, Types } = require('mongoose');
 const dateFormat = require('../utils/dateFormat');
 
 const ReactionSchema = new Schema({
@@ -28,8 +28,7 @@ const ReactionSchema = new Schema({
     id: false
 });
 
-const ThoughtSchema = new Schema(
-  {
+const ThoughtSchema = new Schema({
     thoughtText: {
       type: String, 
       required: true,
@@ -53,8 +52,7 @@ const ThoughtSchema = new Schema(
       virtuals: true
     },
     id: false
-  }
-);
+});
 
 // Virtual called reactionCount that retrieves the length of the thought's reactions array field on query
 ThoughtSchema.virtual('reactionCount').get(function() {
