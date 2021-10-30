@@ -1,12 +1,16 @@
-const { User } = require('../models');
+const { User, Thought } = require('../models');
 
 const userController = {
   // get all Users
   getAllUser(req, res) {
     User.find({})
-      .populate({ // Use populate to populate the field with the comment info
+      .populate({ // Use populate to populate the field with the thoughts info
         path: 'thoughts',
-        select: '-__v' // Tell Mongoose that we don't care about the __v field on comments. We use the minus sign to indicate we don't want it returned
+        select: '-__v' 
+      })
+      .populate({ // Use populate to populate the field with the friends info
+        path: 'friends',
+        select: '-__v' 
       })
       .select('-__v')
       .sort({ _id: -1 }) // Sort by DESC order by the _id value. We can do this because there's a hidden timestamp value in the MongoDB ObjectId
@@ -22,6 +26,10 @@ const userController = {
     User.findOne({ _id: params.userId })
     .populate({
       path: 'thoughts',
+      select: '-__v'
+    })
+    .populate({
+      path: 'friends',
       select: '-__v'
     })
     .select('-__v')
@@ -71,23 +79,36 @@ const userController = {
   },
 
   // Create friend
-  createFriend({ body }, res) { // Destructure body out of the Express req object since that's the only part we need 
-    User.create(body) // create will handle either inserting one or inserting many
-      .then(dbUserData => res.json(dbUserData))
-      .catch(err => res.status(400).json(err));
+  createFriend({ params }, res) {     
+    User.findOneAndUpdate(
+      { _id: params.userId },
+      { $push: { friends: params.friendId } }, 
+      { new: true, runValidators: true }
+    )
+    .then(dbUserData => {
+      if (!dbUserData) {
+        res.status(404).json({ message: 'No friend found with this id!'});
+        return;
+      }
+      res.json(dbUserData);
+    })
+    .catch(err => res.json(err));
   },
 
   // Delete friend
   deleteFriend({ params }, res) {
-    User.findOneAndDelete({ _id: params.userId })
-      .then(dbUserData => {
-        if (!dbUserData) {
-          res.status(404).json({ message: 'No friend found with this id!' });
-          return;
-        }
-        res.json(dbUserData);
-      })
-      .catch(err => res.status(400).json(err));
+    User.findOneAndDelete(
+      { _id: params.userId },
+      { $pull: { friends: params.friendId } }
+    )
+    .then(dbUserData => {
+      if (!dbUserData) {
+        res.status(404).json({ message: 'No friend found with this id!' });
+        return;
+      }
+      res.json(dbUserData);
+    })
+    .catch(err => res.status(400).json(err));
   }
 };
 

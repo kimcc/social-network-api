@@ -31,13 +31,11 @@ const thoughtController = {
   },
 
   createThought({ params, body }, res) {
-    console.log(body);
     Thought.create(body)
       .then(({ _id }) => {
-        console.log(_id);
         return User.findOneAndUpdate(
-          { _id: params.pizzaId },
-          { $push: { thoughts: _id } }, // Use push to add the data to specific pizza we want to update. Push will add data to an array just like JavaScript. All MongoDB functions start with a a dollar sign to indicate that it's a built-in function
+          { _id: params.userId },
+          { $push: { thoughts: _id } }, // Use push to add the data to specific user we want to update. Push will add data to an array just like JavaScript. All MongoDB functions start with a a dollar sign to indicate that it's a built-in function
           { new: true, runValidators: true }
         );
       })
@@ -86,6 +84,39 @@ const thoughtController = {
         res.json(dbUserData);
       })
       .catch(err => res.json(err));
+  },
+
+  // Create reaction
+  createReaction({ params }, res) {     
+    Thought.findOneAndUpdate(
+      { _id: params.userId },
+      { $push: { thoughts: params.reactionId } }, 
+      { new: true, runValidators: true }
+    )
+    .then(dbThoughtData => {
+      if (!dbThoughtData) {
+        res.status(404).json({ message: 'No reaction found with this id!'});
+        return;
+      }
+      res.json(dbThoughtData);
+    })
+    .catch(err => res.json(err));
+  },
+
+  // Delete reaction
+  deleteReaction({ params }, res) {
+    Thought.findOneAndDelete(
+      { _id: params.thoughtId },
+      { $pull: { friends: params.reactionId } }
+    )
+    .then(dbThoughtData => {
+      if (!dbThoughtData) {
+        res.status(404).json({ message: 'No reaction found with this id!' });
+        return;
+      }
+      res.json(dbThoughtData);
+    })
+    .catch(err => res.status(400).json(err));
   }
 };
 
