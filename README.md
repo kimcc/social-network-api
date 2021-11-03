@@ -1,6 +1,6 @@
 # Social Network API
 
-https://user-images.githubusercontent.com/15278020/140022240-c8e19bb3-9b62-4b21-89d6-128c42f37ae3.mp4
+https://user-images.githubusercontent.com/15278020/140023186-2fc9e12f-6c1d-4438-bbdc-c5b4e0044e67.mp4
 
 The Social Network API is an API for a social media application where users can share their thoughts, react to their friends’ thoughts, and create a friend list. It uses Express.js for routing, a MongoDB database, and the Mongoose ODM.
 
